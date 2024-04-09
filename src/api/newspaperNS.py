@@ -66,3 +66,44 @@ class NewspaperID(Resource):
             return jsonify(f"Newspaper with ID {paper_id} was not found")
         Agency.get_instance().remove_newspaper(targeted_paper)
         return jsonify(f"Newspaper with ID {paper_id} was removed")
+
+@newspaper_ns.route("/<int:paper_id>/issue")
+class NewspaperIssue(Resource):
+    @newspaper_ns.doc("List all issues of a specific newspaper")
+    def get(self, paper_id):
+        pass
+    @newspaper_ns.doc("Create a new issue")
+    def post(self, paper_id):
+        pass
+
+@newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>")
+class NewspaperIssueID(Resource):
+    @newspaper_ns.doc("Get information of a newspaper issue")
+    def get(self, issue_id):
+        pass
+
+@newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/release")
+class NewspaperIssueRelease(Resource):
+    @newspaper_ns.doc("Release an issue")
+    def post(self, issue_id):
+        pass
+
+@newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/editor")
+class NewspaperIssueEditor(Resource):
+    @newspaper_ns.doc("Specify an editor for an issue (Transmit the editor ID as parameter)")
+    def post(self, editor_id):
+        pass
+
+@newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/deliver")
+class NewspaperIssueDeliver(Resource):
+    @newspaper_ns.doc("Get information of a newspaper issue")
+    def post(self, issue_id):
+        pass
+
+@newspaper_ns.route("/<int:paper_id>/stats")
+class NewspaperIssueStats(Resource):
+    @newspaper_ns.doc("Return information about the specific newspaper (number of subscribers, monthly and annual revenue)")
+    def get(self, issue_id):
+        pass
+
+
