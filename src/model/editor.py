@@ -8,4 +8,10 @@ class Editor:
         self.name = name
         self.address = address
         self.newspapers = []
-
+        self.issues = []
+    
+    def update(self, name = None, address = None):
+        if name is not None:
+            self.name = name
+        if address is not None:
+            self.address = address
