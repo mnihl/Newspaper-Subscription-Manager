@@ -17,8 +17,9 @@ class Newspaper(object):
         self.subscribers = 0
         self.issues: List[Issue] = []
 
-    def list_all_issues(self):
-        return self.issues
+    def list_all_issues(self, paper_id):
+        if self.paper_id == paper_id:
+            return self.issues
     
     def create_new_issue(self):
         self.issues.append(Issue(datetime.datetime.now(), random.randint(10, 20)))
@@ -28,6 +29,14 @@ class Newspaper(object):
             if issue.issue_id == issue_id:
                 return issue
         return None
+    
+    def update(self, paper_id, name = None, frequency = None, price = None):
+        if name is not None:
+            self.name = name
+        if frequency is not None:
+            self.frequency = frequency
+        if price is not None:
+            self.price = price
 
     def release_issue(self, issue_id):
         issue = self.get_issue(issue_id)

@@ -33,6 +33,13 @@ class Agency(object):
                 return paper
         return None
 
+    def update_newspaper(self, paper_id, data):
+        # print(data)
+        for paper in self.newspapers:
+            if paper.paper_id == paper_id:
+                paper.update(paper_id, data['name'], data['frequency'], data['price'])
+                return paper
+
     def all_newspapers(self) -> List[Newspaper]:
         return self.newspapers
 

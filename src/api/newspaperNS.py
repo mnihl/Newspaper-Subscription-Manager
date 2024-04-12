@@ -1,5 +1,8 @@
 from flask import jsonify
 from flask_restx import Namespace, reqparse, Resource, fields
+import uuid
+from flask import request
+
 
 from ..model.agency import Agency
 from ..model.newspaper import Newspaper
@@ -20,13 +23,11 @@ paper_model = newspaper_ns.model('NewspaperModel', {
 
 @newspaper_ns.route('/')
 class NewspaperAPI(Resource):
-
     @newspaper_ns.doc(paper_model, description="Add a new newspaper")
     @newspaper_ns.expect(paper_model, validate=True)
     @newspaper_ns.marshal_with(paper_model, envelope='newspaper')
     def post(self):
-        # TODO: this is not smart! you should find a better way to generate a unique ID!
-        paper_id = len(Agency.get_instance().newspapers) + 20
+        paper_id = uuid.uuid4().int % 1000
 
         # create a new paper object and add it
         new_paper = Newspaper(paper_id=paper_id,
@@ -56,8 +57,9 @@ class NewspaperID(Resource):
     @newspaper_ns.expect(paper_model, validate=True)
     @newspaper_ns.marshal_with(paper_model, envelope='newspaper')
     def post(self, paper_id):
-        # TODO: update newspaper
-        pass
+        data = request.get_json()
+        updated_paper = Agency.get_instance().update_newspaper(paper_id, data)
+        return updated_paper
 
     @newspaper_ns.doc(description="Delete a new newspaper")
     def delete(self, paper_id):
@@ -71,32 +73,37 @@ class NewspaperID(Resource):
 class NewspaperIssue(Resource):
     @newspaper_ns.doc("List all issues of a specific newspaper")
     def get(self, paper_id):
-        pass
+        return Agency.get_instance().get_newspaper(paper_id).list_all_issues(paper_id)
     @newspaper_ns.doc("Create a new issue")
     def post(self, paper_id):
-        pass
+        Agency.get_instance().get_newspaper(paper_id).create_new_issue()
+        return "New issue created"
 
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>")
 class NewspaperIssueID(Resource):
     @newspaper_ns.doc("Get information of a newspaper issue")
-    def get(self, issue_id):
-        pass
+    def get(self, paper_id, issue_id):
+        return Agency.get_instance().get_newspaper(paper_id).get_issue(issue_id)
 
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/release")
 class NewspaperIssueRelease(Resource):
     @newspaper_ns.doc("Release an issue")
-    def post(self, issue_id):
-        pass
+    def post(self, paper_id, issue_id):
+        return Agency.get_instance().get_newspaper(paper_id).publish(issue_id)
 
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/editor")
 class NewspaperIssueEditor(Resource):
     @newspaper_ns.doc("Specify an editor for an issue (Transmit the editor ID as parameter)")
-    def post(self, editor_id):
-        pass
+    def post(self, paper_id, issue_id, editor_id):
+        for editor in Agency.get_instance().all_editors():
+            if editor.editor_id == editor_id:
+                Agency.get_instance().get_newspaper(paper_id).get_issue(issue_id).set_editor(editor)
+                return True
+
 
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/deliver")
 class NewspaperIssueDeliver(Resource):
-    @newspaper_ns.doc("Get information of a newspaper issue")
+    @newspaper_ns.doc("'Send' an issue to a subscriber. This means there should be a record of the subscriber receiving")
     def post(self, issue_id):
         pass
 
