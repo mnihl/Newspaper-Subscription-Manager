@@ -323,3 +323,171 @@ def test_subscribe(agency):
     agency.subscribe(999, 1)
     assert len(new_subscriber.newspapers) == 1
     assert new_paper.subscribers == 1
+
+    #newspaper.py tests here
+    #had issues with the ID causing tests to wrongly fail when I tried the separate test_newspaper.py file
+def test_list_all_issues(agency):
+    agency.newspapers = []
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    agency.add_newspaper(new_paper)
+    new_paper.create_new_issue()
+    assert new_paper.list_all_issues(new_paper.paper_id) == new_paper.issues
+
+def test_create_new_issue(agency):
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    assert len(new_paper.issues) == 0
+    new_paper.create_new_issue()
+    assert len(new_paper.issues) == 1
+
+def test_get_issue(agency):
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    new_paper.create_new_issue()
+    issue = new_paper.issues[0]
+    assert new_paper.get_issue(issue.issue_id) == issue
+    assert new_paper.get_issue(1000) == None
+
+
+def test_update_newspaper(agency):
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    assert new_paper.name == "Simpsons Comic"
+    new_paper.update(new_paper.paper_id, name="The Washington Post")
+    assert new_paper.name == "The Washington Post"
+
+def test_release_issue(agency):
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    new_paper.create_new_issue()
+    issue = new_paper.issues[0]
+    assert issue.released == False
+    new_paper.release_issue(issue.issue_id)
+    assert issue.released == True
+
+def test_stats(agency):
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    assert new_paper.stats()["subscribers"] == 0
+    new_paper.subscribers = 10
+    assert new_paper.stats()["subscribers"] == 10
+
+
+#issue.py tests
+
+def test_set_editor(agency):
+    new_editor = Editor(editor_id=1,
+                        name="John Doe",
+                        address="1234 Main St")
+    new_issue = Issue(pubdate=20,
+                      pages = 20,
+                      issue_id=1)
+    new_issue.set_editor(new_editor)
+    assert new_issue.editor == new_editor
+
+def test_publish(agency):
+    new_issue = Issue(pubdate=20,
+                      pages = 20,
+                      issue_id=1)
+    assert new_issue.released == False
+    new_issue.publish()
+    assert new_issue.released == True
+
+#editor.py tests
+
+def test_update_editor(agency):
+    new_editor = Editor(editor_id=1,
+                        name="John Doe",
+                        address="1234 Main St")
+    assert new_editor.name == "John Doe"
+    assert new_editor.address == "1234 Main St"
+    new_editor.update(1, "Jane Doe", "5678 Main St")
+    assert new_editor.name == "Jane Doe"
+    assert new_editor.address == "5678 Main St"
+
+#subscriber.py tests
+def test_subscribe_subscriber(agency):
+    new_subscriber = Subscriber(subscriber_id=1,
+                                name="Jane Doe",
+                                address="1234 Main St")
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    assert len(new_subscriber.newspapers) == 0
+    assert new_paper.subscribers == 0
+    new_subscriber.subscribe(new_paper)
+    assert len(new_subscriber.newspapers) == 1
+    assert new_paper.subscribers == 1
+
+def test_receive_issue(agency):
+    new_subscriber = Subscriber(subscriber_id=1,
+                                name="Jane Doe",
+                                address="1234 Main St")
+    new_issue = Issue(pubdate=20,
+                      pages = 20,
+                      issue_id=1)
+    new_editor = Editor(editor_id=1,
+                        name="John Doe",
+                        address="1234 Main St")
+    new_newspaper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    new_issue.set_editor(new_editor)
+    new_editor.newspapers.append(new_newspaper)
+    assert len(new_subscriber.received) == 0
+    assert len(new_subscriber.received_history) == 0
+    new_subscriber.receive_issue(new_issue)
+    assert len(new_subscriber.received) == 1
+    assert len(new_subscriber.received_history) == 1
+
+def test_subscriber_stats(agency):
+    new_subscriber = Subscriber(subscriber_id=1,
+                                name="Jane Doe",
+                                address="1234 Main St")
+    new_paper = Newspaper(paper_id=999,
+                          name="Simpsons Comic",
+                          frequency=7,
+                          price=3.14)
+    new_paper2 = Newspaper(paper_id=1000,
+                          name="Superman Comic",
+                          frequency=1,
+                          price=13.14)
+    new_subscriber.subscribe(new_paper)
+    new_subscriber.subscribe(new_paper2)
+    new_issue = Issue(pubdate=20,
+                      pages = 20,
+                      issue_id=1)
+    new_editor = Editor(editor_id=1,
+                        name="John Doe",
+                        address="1234 Main St")
+    new_issue.set_editor(new_editor)
+    new_editor.newspapers.append(new_paper)
+    new_subscriber.receive_issue(new_issue)
+    assert new_subscriber.stats()["name"] == "Jane Doe"
+    assert new_subscriber.stats()["address"] == "1234 Main St"
+    assert new_subscriber.stats()["subscriptions"] == ["Simpsons Comic", "Superman Comic"]
+
+def test_check_undelivered(agency):
+    new_subscriber = Subscriber(subscriber_id=1,
+                                name="Jane Doe",
+                                address="1234 Main St")
+    new_issue = Issue(pubdate=20,
+                      pages = 20,
+                      issue_id=1)
+    agency.deliver_issue(new_issue.issue_id, new_subscriber.subscriber_id)
+    assert new_issue.issue_id not in new_subscriber.check_undelivered()
