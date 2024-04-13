@@ -38,5 +38,3 @@ def test_add_newspaper(client, agency):
     assert paper_response["price"] == 3.14
 
 
-
-

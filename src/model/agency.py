@@ -23,8 +23,7 @@ class Agency(object):
         return Agency.singleton_instance
 
     def add_newspaper(self, new_paper: Newspaper):
-        #TODO: assert that ID does not exist  yet (or create a new one)
-        assert new_paper.paper_id not in [paper.paper_id for paper in self.newspapers]
+        assert new_paper.paper_id not in [paper.paper_id for paper in self.newspapers], "A newspaper with ID {} already exists".format(new_paper.paper_id)
         self.newspapers.append(new_paper)
 
     def get_newspaper(self, paper_id: Union[int,str]) -> Optional[Newspaper]:
@@ -45,6 +44,23 @@ class Agency(object):
 
     def remove_newspaper(self, paper: Newspaper):
         self.newspapers.remove(paper)
+
+    def specify_editor(self, issue_id, editor_id):
+        for paper in self.newspapers:
+            for issue in paper.issues:
+                if issue.issue_id == issue_id:
+                    issue.editor = editor_id
+                    return True
+        return False
+
+    def deliver_issue(self, issue_id, subscriber_id):
+        for paper in self.newspapers:
+            for issue in paper.issues:
+                if issue.issue_id == issue_id:
+                    for sub in self.subscribers:
+                        if sub.subscriber_id == subscriber_id:
+                            sub.receive_issue(issue)
+                            return True
     
     def get_editor(self, editor_id):
         for editor in self.editors:
@@ -57,12 +73,13 @@ class Agency(object):
     
     def new_editor(self, editor: Editor):
         self.editors.append(editor)
+        return editor
 
     def update_editor(self, editor_id, name = None, address = None) -> bool:
         editor = self.get_editor(editor_id)
         if editor:
-            editor.update(name, address)
-            return True
+            editor.update(editor_id, name, address)
+            return editor
         return False
     
     def delete_editor(self, editor_id):
@@ -81,38 +98,40 @@ class Agency(object):
     def get_subscribers(self):
         return self.subscribers
     
-    def get_subscriber(self, sub_id):
+    def get_subscriber(self, subscriber_id):
         for sub in self.subscribers:
-            if sub.sub_id == sub_id:
+            if sub.subscriber_id == subscriber_id:
                 return sub
         return None
     
     def new_subscriber(self, subscriber: Subscriber):
         self.subscribers.append(subscriber)
+        return subscriber
     
-    def subscriber_info(self, sub_id):
-        subscriber = self.get_subscriber(sub_id)
+    def subscriber_info(self, subscriber_id):
+        subscriber = self.get_subscriber(subscriber_id)
         if subscriber:
             return subscriber
         return None
     
-    def subscriber_update(self, sub_id, name = None, address = None):
-        subscriber = self.get_subscriber(sub_id)
+    def subscriber_update(self, subscriber_id, name = None, address = None):
+        subscriber = self.get_subscriber(subscriber_id)
         if subscriber:
-            subscriber.update(name, address)
-            return True
+            subscriber.name = name
+            subscriber.address = address
+            return subscriber
         return False
     
-    def delete_subscriber(self, sub_id):
-        subscriber = self.get_subscriber(sub_id)
+    def delete_subscriber(self, subscriber_id):
+        subscriber = self.get_subscriber(subscriber_id)
         if subscriber:
             self.subscribers.remove(subscriber)
             return True
         return False
     
-    def subscribe(self, newspaper_id, sub_id):
+    def subscribe(self, newspaper_id, subscriber_id):
         newspaper = self.get_newspaper(newspaper_id)
-        subscriber = self.get_subscriber(sub_id)
+        subscriber = self.get_subscriber(subscriber_id)
         if newspaper and subscriber:
             subscriber.subscribe(newspaper)
             return True

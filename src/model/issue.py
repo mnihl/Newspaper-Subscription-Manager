@@ -9,6 +9,7 @@ class Issue(object):
         self.released: bool = released
         self.editor = None
         self.pages = pages
+        self.delivered = False
 
     def set_editor(self, editor: Editor):
         self.editor = editor

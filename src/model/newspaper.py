@@ -6,6 +6,7 @@ from .editor import Editor
 from .subscriber import Subscriber
 import datetime
 import random
+import uuid
 
 
 class Newspaper(object):
@@ -22,7 +23,8 @@ class Newspaper(object):
             return self.issues
     
     def create_new_issue(self):
-        self.issues.append(Issue(datetime.datetime.now(), random.randint(10, 20)))
+        issue_id = uuid.uuid4().int % 1000
+        self.issues.append(Issue(datetime.datetime.now(), random.randint(10, 20), issue_id))
     
     def get_issue(self, issue_id):
         for issue in self.issues:
@@ -45,21 +47,6 @@ class Newspaper(object):
             return True
         return False
 
-    # def specify_editor(self, issue_id, editor_id):
-    #     issue = self.get_issue(issue_id)
-    #     editor = Agency.get_instance().get_editor(editor_id)
-    #     if issue and editor:
-    #         issue.set_editor(editor)
-    #         return True
-    #     return False
-    
-    # def deliver_issue(self, issue_id, subscriber_id):
-    #     issue = self.get_issue(issue_id)
-    #     subscriber = Agency.get_instance().get_subscriber(subscriber_id)
-    #     if issue and subscriber:
-    #         subscriber.receive_issue(issue)
-    #         return True
-    #     return False
     
     def stats(self):
         return {

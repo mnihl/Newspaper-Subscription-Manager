@@ -1,6 +1,8 @@
 from flask import jsonify
 from flask_restx import Namespace, reqparse, Resource, fields
 import uuid
+from flask import request
+
 
 from ..model.editor import Editor
 from ..model.agency import Agency
@@ -23,11 +25,17 @@ class EditorAPI(Resource):
     @editor_ns.doc(editor_model, description = "List all editors in the agency")
     @editor_ns.marshal_with(editor_model, envelope='editor')
     def get(self):
-        pass
+        return Agency.get_instance().all_editors()
     @editor_ns.doc(editor_model, description ="Create a new editor")
     @editor_ns.expect(editor_model, validate=True)
+    @editor_ns.marshal_with(editor_model, envelope='editor')
     def post(self):
-        pass
+        editor_id = uuid.uuid4().int % 1000
+        new_editor = Editor(editor_id=editor_id,
+                            name=editor_ns.payload['name'],
+                            address=editor_ns.payload['address'])
+        Agency.get_instance().new_editor(new_editor)
+        return new_editor
 
 @editor_ns.route('/<int:editor_id>')
 class editorID(Resource):
@@ -41,34 +49,23 @@ class editorID(Resource):
     @editor_ns.doc(parser=editor_model, description="Update an editors information")
     @editor_ns.expect(editor_model, validate=True)
     @editor_ns.marshal_with(editor_model, envelope='editor')
-    def post(self, paper_id):
-        # TODO: update editor
-        pass
+    def post(self, editor_id):
+        data = request.get_json()
+        updated_editor = Agency.get_instance().update_editor(editor_id, data["name"], data["address"])
+        return updated_editor
 
     @editor_ns.doc(editor_model, description="Delete an editor")
-    def delete(self, paper_id):
-        targeted_paper = Agency.get_instance().get_editor(paper_id)
-        if not targeted_paper:
-            return jsonify(f"editor with ID {paper_id} was not found")
-        Agency.get_instance().remove_editor(targeted_paper)
-        return jsonify(f"editor with ID {paper_id} was removed")
-
-@editor_ns.route("/<int:editor_id>")
-class EditorID(Resource):
-    @editor_ns.doc(editor_model, description ="Get an editor's information")
-    def get(self, editor_id):
-        pass
-    @editor_ns.doc(editor_model, description ="Update an editor's information")
-    @editor_ns.expect(editor_model, validate=True)
-    def post(self, editor_id):
-        pass
-    @editor_ns.doc(editor_model, description ="Delete an editor")
     def delete(self, editor_id):
-        pass
+        targeted_editor = Agency.get_instance().get_editor(editor_id)
+        if not targeted_editor:
+            return jsonify(f"editor with ID {editor_id} was not found")
+        Agency.get_instance().delete_editor(targeted_editor)
+        return jsonify(f"editor with ID {editor_id} was removed")
 
 @editor_ns.route("/<int:editor_id>/issues")
-class EditorIssues(Resource):
-    @editor_ns.doc(editor_model,description = "Return a list of newspaper issues that the editor was responsible for")
+class EditorIssue(Resource):
+    @editor_ns.doc(editor_model, description ="Get an editor's information")
+    @editor_ns.marshal_with(editor_model, envelope='editor')
     def get(self, editor_id):
-        pass
+        return Agency.get_instance().editor_issues(editor_id)
 

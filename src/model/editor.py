@@ -10,8 +10,9 @@ class Editor:
         self.newspapers = []
         self.issues = []
     
-    def update(self, name = None, address = None):
+    def update(self, editor_id, name = None, address = None):
         if name is not None:
             self.name = name
         if address is not None:
             self.address = address
+        return self

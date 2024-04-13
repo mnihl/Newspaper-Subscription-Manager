@@ -104,13 +104,13 @@ class NewspaperIssueEditor(Resource):
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/deliver")
 class NewspaperIssueDeliver(Resource):
     @newspaper_ns.doc("'Send' an issue to a subscriber. This means there should be a record of the subscriber receiving")
-    def post(self, issue_id):
-        pass
+    def post(self, issue_id, subscriber_id):
+        return Agency.get_instance().deliver_issue(issue_id, subscriber_id)
 
 @newspaper_ns.route("/<int:paper_id>/stats")
 class NewspaperIssueStats(Resource):
     @newspaper_ns.doc("Return information about the specific newspaper (number of subscribers, monthly and annual revenue)")
-    def get(self, issue_id):
-        pass
+    def get(self, paper_id):
+        return Agency.get_instance().get_newspaper(paper_id).stats()
 
 
