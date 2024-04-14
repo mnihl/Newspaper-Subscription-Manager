@@ -44,13 +44,21 @@ class Agency(object):
 
     def remove_newspaper(self, paper: Newspaper):
         self.newspapers.remove(paper)
+    
+    # def list_all_issues(self, paper_id):
+    #     for paper in self.newspapers:
+    #         if paper.paper_id == paper_id:
+    #             return paper.issues
 
     def specify_editor(self, issue_id, editor_id):
         for paper in self.newspapers:
             for issue in paper.issues:
                 if issue.issue_id == issue_id:
-                    issue.editor = editor_id
-                    return True
+                    for editor in self.editors:
+                        if editor.editor_id == editor_id:
+                            issue.editor = editor
+                            editor.issues.append(issue_id)
+                            return True
         return False
 
     def deliver_issue(self, issue_id, subscriber_id):
@@ -86,7 +94,6 @@ class Agency(object):
         editor = self.get_editor(editor_id)
         if editor:
             self.editors.remove(editor)
-            return True
         return False
     
     def editor_issues(self, editor_id):

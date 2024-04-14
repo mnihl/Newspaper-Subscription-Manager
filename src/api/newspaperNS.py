@@ -20,6 +20,15 @@ paper_model = newspaper_ns.model('NewspaperModel', {
             help='The monthly price of the newspaper (e.g. 12.3)')
    })
 
+issue_model = newspaper_ns.model('IssueModel', {
+    'pubdate': fields.DateTime(required=True,
+            help='The date of the issue'),
+    'pages': fields.Integer(required=True,
+            help='The pages of the issue'),
+    'issue_id': fields.Integer(required=False,
+            help='The unique identifier of an issue'),
+   })
+
 
 @newspaper_ns.route('/')
 class NewspaperAPI(Resource):
@@ -72,9 +81,11 @@ class NewspaperID(Resource):
 @newspaper_ns.route("/<int:paper_id>/issue")
 class NewspaperIssue(Resource):
     @newspaper_ns.doc("List all issues of a specific newspaper")
+    @newspaper_ns.marshal_list_with(issue_model, envelope='issues')
     def get(self, paper_id):
         return Agency.get_instance().get_newspaper(paper_id).list_all_issues(paper_id)
     @newspaper_ns.doc("Create a new issue")
+    @newspaper_ns.expect(issue_model, validate=True)
     def post(self, paper_id):
         Agency.get_instance().get_newspaper(paper_id).create_new_issue()
         return "New issue created"
@@ -82,18 +93,23 @@ class NewspaperIssue(Resource):
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>")
 class NewspaperIssueID(Resource):
     @newspaper_ns.doc("Get information of a newspaper issue")
+    @newspaper_ns.marshal_list_with(issue_model, envelope='issue')
     def get(self, paper_id, issue_id):
         return Agency.get_instance().get_newspaper(paper_id).get_issue(issue_id)
 
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/release")
 class NewspaperIssueRelease(Resource):
     @newspaper_ns.doc("Release an issue")
+    @newspaper_ns.expect(issue_model, validate=True)
+    @newspaper_ns.marshal_with(issue_model, envelope='issue')
     def post(self, paper_id, issue_id):
-        return Agency.get_instance().get_newspaper(paper_id).publish(issue_id)
+        return Agency.get_instance().get_newspaper(paper_id).get_issue(issue_id).publish()
 
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/editor")
 class NewspaperIssueEditor(Resource):
     @newspaper_ns.doc("Specify an editor for an issue (Transmit the editor ID as parameter)")
+    @newspaper_ns.expect(issue_model, validate=True)
+    @newspaper_ns.marshal_with(issue_model, envelope='issue')
     def post(self, paper_id, issue_id, editor_id):
         for editor in Agency.get_instance().all_editors():
             if editor.editor_id == editor_id:
@@ -103,13 +119,16 @@ class NewspaperIssueEditor(Resource):
 
 @newspaper_ns.route("/<int:paper_id>/issue/<int:issue_id>/deliver")
 class NewspaperIssueDeliver(Resource):
-    @newspaper_ns.doc("'Send' an issue to a subscriber. This means there should be a record of the subscriber receiving")
+    @newspaper_ns.doc("'Send an issue to a subscriber. This means there should be a record of the subscriber receiving")
+    @newspaper_ns.expect(issue_model, validate=True)
+    @newspaper_ns.marshal_with(issue_model, envelope='issue')
     def post(self, issue_id, subscriber_id):
         return Agency.get_instance().deliver_issue(issue_id, subscriber_id)
 
 @newspaper_ns.route("/<int:paper_id>/stats")
 class NewspaperIssueStats(Resource):
     @newspaper_ns.doc("Return information about the specific newspaper (number of subscribers, monthly and annual revenue)")
+    @newspaper_ns.expect(paper_model, validate=True)
     def get(self, paper_id):
         return Agency.get_instance().get_newspaper(paper_id).stats()
 

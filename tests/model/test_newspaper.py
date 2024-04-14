@@ -5,7 +5,7 @@ from ...src.model.editor import Editor
 from ...src.model.issue import Issue
 from ...src.model.subscriber import Subscriber
 import uuid
-from ..fixtures import app, client, agency, newspaper
+from ..fixtures import app, client, agency
 
 
 # def test_list_all_issues(newspaper):

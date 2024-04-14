@@ -18,6 +18,15 @@ sub_model = sub_ns.model('SubscriberModel', {
             help='A list of the newspapers the subscriber is subscribed to'))
    })
 
+issue_model = sub_ns.model('IssueModel', {
+    'pubdate': fields.DateTime(required=True,
+            help='The date of the issue'),
+    'pages': fields.Integer(required=True,
+            help='The pages of the issue'),
+    'issue_id': fields.Integer(required=False,
+            help='The unique identifier of an issue'),
+   })
+
 @sub_ns.route("/")
 class subAPI(Resource):
     @sub_ns.doc(sub_model, description = "List all subscribers in the agency")
@@ -76,6 +85,6 @@ class subStats(Resource):
 @sub_ns.route("/<int:subscriber_id>/missingissues")
 class subIssues(Resource):
     @sub_ns.doc(sub_model, description = "Check if there are any undelivered issues of the subscribed newspapers.")
-    @sub_ns.marshal_with(sub_model, envelope='subscriber')
+    @sub_ns.marshal_with(issue_model, envelope='subscriber')
     def get(self, subscriber_id):
         return Agency.get_instance().get_subscriber(subscriber_id).check_undelivered()

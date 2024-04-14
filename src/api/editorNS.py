@@ -20,6 +20,15 @@ editor_model = editor_ns.model('EditorModel', {
             help='A list of newspapers that the editor can care for'))
    })
 
+issue_model = editor_ns.model('IssueModel', {
+    'pubdate': fields.DateTime(required=True,
+            help='The date of the issue'),
+    'pages': fields.Integer(required=True,
+            help='The pages of the issue'),
+    'issue_id': fields.Integer(required=False,
+            help='The unique identifier of an issue'),
+   })
+
 @editor_ns.route("/")
 class EditorAPI(Resource):
     @editor_ns.doc(editor_model, description = "List all editors in the agency")

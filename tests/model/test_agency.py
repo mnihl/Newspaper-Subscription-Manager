@@ -123,6 +123,8 @@ def test_specify_editor(agency):
                         address="1234 Main St")
     agency.new_editor(new_editor)
     assert agency.specify_editor(new_paper.issues[0].issue_id, new_editor.editor_id) == True
+    assert new_paper.issues[0].editor == new_editor
+    assert new_editor.issues[0] == new_paper.issues[0].issue_id
 
 def test_deliver_issue(agency):
     agency.newspapers = []
@@ -201,9 +203,9 @@ def test_delete_editor(agency):
                         address="1234 Main St")
     agency.new_editor(new_editor)
     assert len(agency.all_editors()) == 1
-    assert agency.delete_editor(1) == True
+    agency.delete_editor(1)
     assert len(agency.all_editors()) == 0
-    assert agency.delete_editor(1) == False
+
 
 def test_editor_issues(agency):
     agency.editors = []

@@ -25,6 +25,7 @@ class Newspaper(object):
     def create_new_issue(self):
         issue_id = uuid.uuid4().int % 1000
         self.issues.append(Issue(datetime.datetime.now(), random.randint(10, 20), issue_id))
+        return self.issues[-1]
     
     def get_issue(self, issue_id):
         for issue in self.issues:
